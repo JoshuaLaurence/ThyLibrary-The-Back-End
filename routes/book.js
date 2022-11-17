@@ -1,4 +1,5 @@
 const express = require("express");
+const generateCoOrds = require("../db/coords");
 const db = require("../db/db");
 const {Book, Position, Rotation} = require("../models")
 
@@ -11,7 +12,7 @@ bookRouter.get("/sync", async (request, response) => {
 
 bookRouter.get("/", async (request, response) => {
     try {
-        const allBooks = await Book.findAll(include: [Position, Rotation]);
+        const allBooks = await Book.findAll({include: [Position, Rotation]});
         if (allBooks === []) {
             throw new Error("The library is empty...")
         }
@@ -37,6 +38,9 @@ bookRouter.post("/", async (request, response) => {
     try {
         console.log(request.body)
         const chosenBook = await Book.create(request.body);
+        const results = generateCoOrds()
+        await chosenBook.createPosition(results[0])
+        await chosenBook.createRotation(results[1])
         response.status(200).send(chosenBook)
     } catch (error) {
         response.status(500).send(error.message)
