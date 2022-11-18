@@ -41,6 +41,7 @@ bookRouter.post("/", async (request, response) => {
         const pos = {position: results[0]}
         const rot = {rotation: results[1]}
         const data = {...request.body, ...pos, ...rot}
+        console.log(data)
         const chosenBook = await Book.create(data);
         response.status(200).send(chosenBook)
     } catch (error) {
