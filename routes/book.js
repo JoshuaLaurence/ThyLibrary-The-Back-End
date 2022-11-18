@@ -37,7 +37,7 @@ bookRouter.get("/:bookID", async (request, response) => {
 bookRouter.post("/", async (request, response) => {
     try {
         console.log(request.body)
-        const results = generateCoOrds()
+        const results = await generateCoOrds()
         const pos = {position: results[0]}
         const rot = {rotation: results[1]}
         const data = {...request.body, ...pos, ...rot}
