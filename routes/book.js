@@ -1,18 +1,18 @@
 const express = require("express");
 const generateCoOrds = require("../db/coords");
 const db = require("../db/db");
-const {Book, Position, Rotation} = require("../models")
+const {Book} = require("../models")
 
 const bookRouter = express.Router();
 
 bookRouter.get("/sync", async (request, response) => {
-    await db.sync({force: true})
+    //await db.sync({force: true})
     response.status(200).send("Database Synced")
 })
 
 bookRouter.get("/", async (request, response) => {
     try {
-        const allBooks = await Book.findAll({include: [Position, Rotation]});
+        const allBooks = await Book.find({});
         if (allBooks === []) {
             throw new Error("The library is empty...")
         }
@@ -24,7 +24,7 @@ bookRouter.get("/", async (request, response) => {
 
 bookRouter.get("/:bookID", async (request, response) => {
     try {
-        const chosenBook = await Book.findOne({where: {id: request.params.bookID}});
+        const chosenBook = await Book.findById(request.params.bookID);
         if (chosenBook === null) {
             throw new Error("This book doesn't exist")
         }
@@ -37,28 +37,16 @@ bookRouter.get("/:bookID", async (request, response) => {
 bookRouter.post("/", async (request, response) => {
     try {
         console.log(request.body)
-        const chosenBook = await Book.create(request.body);
         const results = generateCoOrds()
-        await chosenBook.createPosition(results[0])
-        await chosenBook.createRotation(results[1])
+        const pos = {position: results[0]}
+        const rot = {rotation: results[1]}
+        const data = {...request.body, ...pos, ...rot}
+        const chosenBook = await Book.create(data);
         response.status(200).send(chosenBook)
     } catch (error) {
         response.status(500).send(error.message)
     }
 })
 
-bookRouter.post("/coords/:bookID", async (request, response) => {
-    try {
-        const foundBook = await Book.findOne({where: {id: request.params.bookID}})
-        const pos = await Position.create(request.body.position)
-        const rot = await Rotation.create(request.body.rotation)
-        await foundBook.createPosition(pos)
-        await foundBook.createPosition(rot)
-
-        response.send(200).send(foundBook)
-    } catch (error) {
-        response.status(500).send(error.message)
-    }
-})
 
 module.exports = bookRouter;

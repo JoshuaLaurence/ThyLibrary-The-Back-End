@@ -3,8 +3,8 @@ const db = require("./db")
 const generateCoOrds = require("./coords")
 
 async function seed() {
-    await db.sync({force: true})
-
+    // await db.sync({force: true})
+    await Book.deleteMany()
     // await Book.bulkCreate([
     //     {
     //         title: "Billy Summers",
@@ -39,18 +39,14 @@ async function seed() {
     // ])
 
     for (let i = 0; i < 100; i++) {
+        const results = await generateCoOrds()
         const newBook = await Book.create({
             title: `newBook-${i+1}`,
-            author: "AnAuthor"
+            author: "AnAuthor",
+            position: results[0],
+            rotation: results[1]
         })
-        const results = await generateCoOrds()
-        console.log(results)
-        const pos = await Position.create(results[0])
-        const rot = await Rotation.create(results[1])
 
-        console.log()
-        await newBook.setPosition(pos)
-        await newBook.setRotation(rot)
     }
 };
 
