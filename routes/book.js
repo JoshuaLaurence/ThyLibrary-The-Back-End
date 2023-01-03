@@ -53,7 +53,7 @@ bookRouter.post('/', async (request, response) => {
 	}
 });
 
-bookRouter.post('/delete/:bookID', async (request, response) => {
+bookRouter.get('/delete/:bookID', async (request, response) => {
 	try {
 		const results = await Book.findByIdAndDelete(request.params.bookID);
 		response.status(200).send('Book successfully deleted');
